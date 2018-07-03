@@ -8,7 +8,7 @@ class AppConfig:
         self.dynamodb = boto3.resource('dynamodb')
         self.user_controller = None
 
-    def get_user_service(self):
+    def get_user_controller(self):
         if self.user_controller is not None:
             return self.user_controller
 

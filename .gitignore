@@ -1,3 +1,5 @@
 venv/
 .idea/
 *.iml
+.serverless/
+__pycache__/

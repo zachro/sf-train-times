@@ -5,7 +5,17 @@ provider:
   name: aws
   runtime: python3.6
   region: us-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource:
+        - arn:aws:dynamodb:us-west-2:109011288894:table/TrainUser-test
 
 functions:
-  setHomeCity:
-    handler: handler.set_home_city
+  handleRequest:
+    handler: handler.handle_request
+    events:
+      - alexaSkill: amzn1.ask.skill.a72af757-c4c7-4c25-98f5-8103bd4cb01a
