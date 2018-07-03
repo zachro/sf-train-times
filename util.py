@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class TrainTimesResponseBuilder:
     """Builder class for generating Alexa responses."""
     VERSION = '1.0'
@@ -51,3 +54,14 @@ class TrainTimesResponseBuilder:
 
     def _has_card(self):
         return self.card_title and self.card_content
+
+
+def parse_datetime(iso_date):
+    year = int(iso_date[:4])
+    month = int(iso_date[5:7])
+    day = int(iso_date[8:10])
+    hour = int(iso_date[11:13])
+    minute = int(iso_date[14:16])
+    second = int(iso_date[17:19])
+
+    return datetime(year, month, day, hour, minute, second)

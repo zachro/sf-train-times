@@ -1,6 +1,6 @@
 import config as config
 import datetime
-from util import TrainTimesResponseBuilder
+from util import TrainTimesResponseBuilder, parse_datetime
 
 APP_CONFIG = config.AppConfig()
 LOG = config.AppConfig.get_logger()
@@ -81,18 +81,7 @@ def get_next_train(user_id, stop_controller, user_controller):
 
 
 def _get_wait_time(arrival_time):
-    arrival = _parse_datetime(arrival_time)
+    arrival = parse_datetime(arrival_time)
     diff = arrival - datetime.datetime.utcnow()
 
     return int(diff.total_seconds() // 60)
-
-
-def _parse_datetime(iso_date):
-    year = int(iso_date[:4])
-    month = int(iso_date[5:7])
-    day = int(iso_date[8:10])
-    hour = int(iso_date[11:13])
-    minute = int(iso_date[14:16])
-    second = int(iso_date[17:19])
-
-    return datetime.datetime(year, month, day, hour, minute, second)
