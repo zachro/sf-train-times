@@ -1,5 +1,6 @@
 import config as config
 import datetime
+from util import TrainTimesResponseBuilder
 
 APP_CONFIG = config.AppConfig()
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
@@ -27,15 +28,6 @@ def handle_request(event, context):
 
 
 def set_home_stop_id(user_id, home_stop_id, user_controller):
-    response = {
-        'version': '1.0',
-        'response': {
-            'outputSpeech': {
-                'type': 'PlainText'
-            }
-        }
-    }
-
     user = user_controller.get_user(user_id)
 
     if user is None:
@@ -44,36 +36,29 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
     else:
         user_controller.update_user(user_id, homeStopId=home_stop_id)
 
-    response['response']['outputSpeech']['text'] = 'I\'ve set your home stop to {}'.format(home_stop_id)
+    output_speech_text = 'I\'ve set your home stop to {}'.format(home_stop_id)
+    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
 
     return response
 
 
 def get_next_train(user_id, stop_controller, user_controller):
-    response = {
-        'version': '1.0',
-        'response': {
-            'outputSpeech': {
-                'type': 'PlainText'
-            }
-        }
-    }
-
     user = user_controller.get_user(user_id)
     if user is None:
-        response['response']['outputSpeech']['text'] = \
-            'Sorry, you\'ll need to set your home stop before asking for train times'
+        output_speech_text = 'Sorry, you\'ll need to set your home stop before asking for train times.'
+        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text)
         return response
 
     next_stops = stop_controller.get_upcoming_visits(user['provider'], user['homeStopId'])
-
     diff_min = get_wait_time(next_stops[0]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
 
     if diff_min < 5:
         second_visit_diff = get_wait_time(next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
-        response['response']['outputSpeech']['text'] = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, second_visit_diff)
+        output_speech_text = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, second_visit_diff)
+        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
     else:
-        response['response']['outputSpeech']['text'] = NEXT_TRAIN_MESSAGE.format(diff_min)
+        output_speech_text = NEXT_TRAIN_MESSAGE.format(diff_min)
+        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
 
     return response
 
