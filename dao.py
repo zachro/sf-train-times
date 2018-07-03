@@ -8,7 +8,7 @@ class UserDAO:
     def get_user(self, user_id):
         response = self.table.get_item(Key={'id': user_id})
 
-        return response['Item']
+        return response.get('Item')
 
     def add_user(self, user):
         self.table.put_item(Item=user)

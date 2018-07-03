@@ -14,10 +14,7 @@ def handle_request(event, context):
     response = {}
 
     try:
-        if intent_name == 'SetHomeCityIntent':
-            home_city = event['request']['intent']['slots']['homeCity']['value']
-            response = set_home_city(user_id, home_city, APP_CONFIG.get_user_controller())
-        elif intent_name == 'SetHomeStopIntent':
+        if intent_name == 'SetHomeStopIntent':
             home_stop_id = event['request']['intent']['slots']['stopId']['value']
             response = set_home_stop_id(user_id, home_stop_id, APP_CONFIG.get_user_controller())
         elif intent_name == 'GetNextTrainIntent':
@@ -65,10 +62,12 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
     user = user_controller.get_user(user_id)
 
     if user is None:
-        response['response']['outputSpeech']['text'] = 'Please set your home city before setting your home stop.'
+        user = {'id': user_id, 'homeStopId': home_stop_id}
+        user_controller.add_user(user)
     else:
         user_controller.update_user(user_id, homeStopId=home_stop_id)
-        response['response']['outputSpeech']['text'] = 'Successfully set your home stop to {}'.format(home_stop_id)
+
+    response['response']['outputSpeech']['text'] = 'I\'ve set your home stop to {}'.format(home_stop_id)
 
     return response
 
