@@ -2,18 +2,39 @@ CITY_NAME_INDEX = 'cityName-index'
 
 
 class UserDAO:
+    """Contains methods for getting, adding, and updating users in the database."""
+
     def __init__(self, table):
+        """
+        Constructs a new UserDAO instance.
+        :param table: A boto3.resources.factory.dynamodb.Table instance representing the user table.
+        """
         self.table = table
 
     def get_user(self, user_id):
+        """
+        Gets a user from the database.
+        :param user_id: The ID of the user to retrieve.
+        :return: A dict representing the user, or None if the user_id could not be found.
+        """
         response = self.table.get_item(Key={'id': user_id})
 
         return response.get('Item')
 
     def add_user(self, user):
+        """
+        Adds a user to the database.
+        :param user: A dict representing the user, containing at minimum an 'id' value.
+        """
         self.table.put_item(Item=user)
 
     def update_user(self, user_id, **kwargs):
+        """
+        Updates a user in the database, or adds the user if it does not exist.
+        :param user_id: The ID for the user to update.
+        :param kwargs: Key-value pairs for each field to update in the database. If the field does not already exist, it
+                       will be added.
+        """
         if kwargs is None:
             return
 

@@ -9,13 +9,16 @@ KEY_STORAGE_PATH = 'five_eleven_keys.json'
 
 
 class AppConfig:
+    """Wires up dependencies."""
     def __init__(self):
+        """Constructs a new AppConfig instance."""
         self.dynamodb = boto3.resource('dynamodb')
         self.s3_client = boto3.client('s3')
         self.user_controller = None
         self.stop_controller = None
 
     def get_user_controller(self):
+        """Returns a UserController instance."""
         if self.user_controller is not None:
             return self.user_controller
 
@@ -25,6 +28,7 @@ class AppConfig:
         return self.user_controller
 
     def get_stop_controller(self):
+        """Returns a StopController instance."""
         if self.stop_controller is not None:
             return self.stop_controller
 

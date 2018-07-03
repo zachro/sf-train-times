@@ -1,26 +1,35 @@
 class TrainTimesResponseBuilder:
+    """Builder class for generating Alexa responses."""
     VERSION = '1.0'
     OUTPUT_SPEECH_TYPE = 'PlainText'
     CARD_TYPE = 'Simple'
 
     def __init__(self):
+        """Constructs an instance of this builder."""
         self.output_speech_text = None
         self.card_title = None
         self.card_content = None
 
     def with_output_speech(self, output_speech_text):
+        """Sets the response.outputSpeech field for the response to be generated."""
         self.output_speech_text = output_speech_text
         return self
 
     def with_card_title(self, card_title):
+        """Sets the response.card.title field for the response to be generated."""
         self.card_title = card_title
         return self
 
     def with_card_content(self, card_content):
+        """Sets the response.card.content field for the response to be generated."""
         self.card_content = card_content
         return self
 
     def build(self):
+        """
+        Builds the response dict.
+        :return: A dict containing the outputSpeech and/or card provided to the builder, formatted as an Alexa response.
+        """
         response = {'version': self.VERSION}
 
         if self.output_speech_text:

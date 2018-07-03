@@ -6,10 +6,18 @@ REAL_TIME_STOP_MONITORING_URL = 'http://api.511.org/transit/StopMonitoring'
 
 
 class FiveElevenClient:
+    """Client for making calls to 511.org APIs."""
     def __init__(self, api_key):
+        """Constructs a new FiveElevenClient instance."""
         self.api_key = api_key
 
     def get_real_time_stop_monitoring(self, agency, stop_id):
+        """
+        Gets upcoming arrivals for the given stop ID.
+        :param agency: The agency serviced by this stop (ex: 'SF')
+        :param stop_id: The ID of the stop.
+        :return: A dict representing the API response.
+        """
         query_params = {
             'api_key': self.api_key,
             'agency': agency,
