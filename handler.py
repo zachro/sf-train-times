@@ -58,7 +58,7 @@ def get_next_train(user_id, stop_controller, user_controller):
     :param user_id: The ID of the device making the request.
     :param stop_controller: A controller.StopController instance for getting train information.
     :param user_controller: A controller.UserController instance.
-    :return: A dict containign the Alexa response.
+    :return: A dict containing the Alexa response.
     """
     user = user_controller.get_user(user_id)
     if user is None:
