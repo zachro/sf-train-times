@@ -26,29 +26,6 @@ def handle_request(event, context):
     return response
 
 
-def set_home_city(user_id, home_city, user_controller):
-    response = {
-        'version': '1.0',
-        'response': {
-            'outputSpeech': {
-                'type': 'PlainText',
-            }
-        }
-    }
-
-    user = user_controller.get_user(user_id)
-
-    if user is None:
-        user = {'id': user_id, 'homeCity': home_city}
-        user_controller.add_user(user)
-    else:
-        user_controller.update_user(user_id, homeCity=home_city)
-
-    response['response']['outputSpeech']['text'] = 'I\'ve set your home city to {}'.format(home_city)
-
-    return response
-
-
 def set_home_stop_id(user_id, home_stop_id, user_controller):
     response = {
         'version': '1.0',

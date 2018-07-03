@@ -9,7 +9,7 @@ class FiveElevenClient:
     def __init__(self, api_key):
         self.api_key = api_key
 
-    def real_time_stop_monitoring(self, agency, stop_id):
+    def get_real_time_stop_monitoring(self, agency, stop_id):
         query_params = {
             'api_key': self.api_key,
             'agency': agency,

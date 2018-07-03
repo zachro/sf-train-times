@@ -17,6 +17,6 @@ class StopController:
         self.five_eleven_client = five_eleven_client
 
     def get_upcoming_visits(self, agency, stop_id):
-        response = self.five_eleven_client.real_time_stop_monitoring(agency, stop_id)
+        response = self.five_eleven_client.get_real_time_stop_monitoring(agency, stop_id)
 
         return response['ServiceDelivery']['StopMonitoringDelivery']['MonitoredStopVisit']
