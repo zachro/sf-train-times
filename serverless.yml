@@ -21,6 +21,6 @@ provider:
 
 functions:
   handleRequest:
-    handler: handler.handle_request
+    handler: sftraintimes.handler.handle_request
     events:
       - alexaSkill: amzn1.ask.skill.a72af757-c4c7-4c25-98f5-8103bd4cb01a

@@ -1,7 +1,5 @@
 import boto3
-import client
-import controller
-import dao
+from sftraintimes import controller, client, dao
 import json
 import logging
 

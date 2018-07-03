@@ -1,6 +1,6 @@
-import config as config
+from sftraintimes import config as config
 import datetime
-from util import TrainTimesResponseBuilder, parse_datetime
+from sftraintimes.util import TrainTimesResponseBuilder, parse_datetime
 
 APP_CONFIG = config.AppConfig()
 LOG = config.AppConfig.get_logger()
