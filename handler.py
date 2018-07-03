@@ -3,13 +3,15 @@ import datetime
 from util import TrainTimesResponseBuilder
 
 APP_CONFIG = config.AppConfig()
+LOG = config.AppConfig.get_logger()
+
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
 NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. After that, there\'s one in {} minutes.'
 
 
 def handle_request(event, context):
     """Handles an incoming request from Alexa."""
-    print('Received an event: {}'.format(event))
+    LOG.debug('Received an event: {}'.format(event))
 
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']
@@ -23,7 +25,7 @@ def handle_request(event, context):
             response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
 
     except Exception as e:
-        print('ERROR: {}'.format(e))
+        LOG.error(e)
 
     return response
 
@@ -44,7 +46,7 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
     else:
         user_controller.update_user(user_id, homeStopId=home_stop_id)
 
-    output_speech_text = 'I\'ve set your home stop to {}'.format(home_stop_id)
+    output_speech_text = 'I\'ve set your home stop to {}.'.format(home_stop_id)
     response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
 
     return response
@@ -61,7 +63,7 @@ def get_next_train(user_id, stop_controller, user_controller):
     user = user_controller.get_user(user_id)
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home stop before asking for train times.'
-        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text)
+        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
         return response
 
     next_stops = stop_controller.get_upcoming_visits(user['provider'], user['homeStopId'])

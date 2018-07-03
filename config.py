@@ -1,8 +1,9 @@
 import boto3
-import dao
 import client
 import controller
+import dao
 import json
+import logging
 
 KEY_STORAGE_BUCKET = 'test-key-storage'
 KEY_STORAGE_PATH = 'five_eleven_keys.json'
@@ -37,3 +38,10 @@ class AppConfig:
 
         self.stop_controller = controller.StopController(client.FiveElevenClient(api_key))
         return self.stop_controller
+
+    @staticmethod
+    def get_logger():
+        logger = logging.getLogger('log')
+        logger.setLevel(logging.WARNING)
+
+        return logger
