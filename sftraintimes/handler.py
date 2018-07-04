@@ -15,23 +15,28 @@ def handle_request(event, context):
 
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']
+    slots = event['request']['intent']['slots']
     response = {}
 
     try:
         if intent_name == 'SetHomeStopByIdIntent':
-            home_stop_id = event['request']['intent']['slots']['stopId']['value']
+            home_stop_id = slots['stopId']['value']
             response = set_home_stop_id(user_id, home_stop_id, APP_CONFIG.get_user_controller())
+
         elif intent_name == 'SetHomeLineIntent':
-            home_line = event['request']['intent']['slots']['line']['value']
+            home_line = slots['line']['value']
             response = set_home_line(user_id, home_line, APP_CONFIG.get_user_controller())
+
         elif intent_name == 'SetHomeDirectionIntent':
-            home_direction = event['request']['intent']['slots']['direction']['value']
+            home_direction = slots['direction']['value']
             response = set_home_direction(user_id, home_direction, APP_CONFIG.get_user_controller())
+
         elif intent_name == 'SetHomeStopIntent':
-            first_street = event['request']['intent']['slots']['firstStreet']['value']
-            second_street = event['request']['intent']['slots']['secondStreet']['value']
+            first_street = slots['firstStreet']['value']
+            second_street = slots['secondStreet']['value']
             response = set_home_stop(user_id, first_street, second_street, APP_CONFIG.get_user_controller(),
                                      APP_CONFIG.get_setup_controller())
+
         elif intent_name == 'GetNextTrainIntent':
             response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
 
@@ -70,7 +75,7 @@ def set_home_line(user_id, home_line, user_controller):
         user = {'id': user_id, 'homeLine': home_line}
         user_controller.add_user(user)
     else:
-        user_controller.update_user(user_id, homeLine=home_line)
+        user_controller.update_user(user_id, homeLine=home_line.upper())
 
     output_speech_text = 'I\'ve set your home line to {}.'.format(home_line)
     response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
