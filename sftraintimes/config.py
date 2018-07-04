@@ -39,6 +39,7 @@ class AppConfig:
         return self.stop_controller
 
     def get_setup_controller(self):
+        """Returns a SetupController instance."""
         if self.setup_controller is not None:
             return self.setup_controller
 

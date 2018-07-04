@@ -55,22 +55,45 @@ class StopController:
 
 
 class LineController:
+    """Controller class for getting line information."""
     def __init__(self, five_eleven_client):
+        """
+        Constructs a new LineController instance.
+        :param five_eleven_client: A client.FiveElevenClient instance for making API calls.
+        """
         self.five_eleven_client = five_eleven_client
 
     def get_patterns_for_line(self, agency, line_id):
+        """
+        Gets patterns for the specified line. A pattern represents the route a train would take on the line.
+        :param agency: The agency serviced by the stop (ex: 'SF').
+        :param line_id: The ID of the line.
+        :return: A list of patterns serviced by the line.
+        """
         response = self.five_eleven_client.get_patterns_for_line(agency, line_id)
 
         return response['journeyPatterns']
 
 
 class SetupController:
+    """Controller class for setting user's home stop."""
     AGENCY = 'SF'
 
     def __init__(self, line_controller):
+        """
+        Constructs a new SetupController instance.
+        :param line_controller: A controller.LineController instance for getting line patterns.
+        """
         self.line_controller = line_controller
 
     def get_stop_id(self, line_id, stop_name, direction):
+        """
+        Gets a stop ID from a stop's human-readable name.
+        :param line_id: The line the stop lies on.
+        :param stop_name: The name of the stop (ex: 'church street and 16th street')
+        :param direction: The direction of the specific stop (IB or OB)
+        :return: The ID of the stop, or None if it cannot be found.
+        """
         patterns = self.line_controller.get_patterns_for_line(self.AGENCY, line_id)
 
         for journey_pattern in patterns:

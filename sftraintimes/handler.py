@@ -69,6 +69,13 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
 
 
 def set_home_line(user_id, home_line, user_controller):
+    """
+    Handles a SetHomeLineIntent request.
+    :param user_id: The ID of the device making the request.
+    :param home_line: The name of the line (K, J, M, etc.)
+    :param user_controller: A controller.UserController instance.
+    :return: A dict containing the Alexa response.
+    """
     user = user_controller.get_user(user_id)
 
     if user is None:
@@ -84,6 +91,13 @@ def set_home_line(user_id, home_line, user_controller):
 
 
 def set_home_direction(user_id, direction, user_controller):
+    """
+    Handles a SetHomeDirectionIntent request.
+    :param user_id: The ID of the device making the request.
+    :param direction: The direction: inbound or outbound.
+    :param user_controller: A controller.UserController instance.
+    :return: A dict containing the Alexa response.
+    """
     direction_id = 'IB' if direction == 'inbound' else 'OB'
 
     user = user_controller.get_user(user_id)
@@ -101,6 +115,15 @@ def set_home_direction(user_id, direction, user_controller):
 
 
 def set_home_stop(user_id, first_street, second_street, user_controller, setup_controller):
+    """
+    Handles a SetHomeStopIntent request.
+    :param user_id: The ID of the device making the request.
+    :param first_street: The first cross street of the stop.
+    :param second_street: The second cross street of the stop.
+    :param user_controller: A controller.UserController instance.
+    :param setup_controller: A controller.SetupController instance.
+    :return: A dict containing the Alexa response.
+    """
     first_st = _parse_street(first_street)
     second_st = _parse_street(second_street)
     user = user_controller.get_user(user_id)

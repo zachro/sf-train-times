@@ -33,6 +33,12 @@ class FiveElevenClient:
         return response
 
     def get_patterns_for_line(self, agency, line_id):
+        """
+        Gets patterns for the specified line. A pattern represents the route a train travels on the line.
+        :param agency: The agency serviced by this stop (ex: 'SF')
+        :param line_id: The ID of the line (K, J, M, etc.)
+        :return: A list of patterns serviced by this line.
+        """
         query_params = {
             'api_key': self.api_key,
             'operator_id': agency,
