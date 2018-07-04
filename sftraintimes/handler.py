@@ -18,7 +18,7 @@ def handle_request(event, context):
     response = {}
 
     try:
-        if intent_name == 'SetHomeStopIntent':
+        if intent_name == 'SetHomeStopByIdIntent':
             home_stop_id = event['request']['intent']['slots']['stopId']['value']
             response = set_home_stop_id(user_id, home_stop_id, APP_CONFIG.get_user_controller())
         elif intent_name == 'GetNextTrainIntent':
