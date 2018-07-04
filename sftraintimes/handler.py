@@ -34,7 +34,7 @@ def handle_request(event, context):
             response = handle_set_home_stop_intent(user_id, slots, UserService(), SetupController())
 
         elif intent_name == 'SetupDialogIntent':
-            response = handle_setup_dialog_intent(user_id, slots, dialog_state)
+            response = handle_setup_dialog_intent(user_id, slots, dialog_state, UserService(), SetupController())
 
         elif intent_name == 'GetNextTrainIntent':
             response = handle_get_next_train_intent(user_id, StopService(), UserService())
@@ -51,7 +51,7 @@ def handle_request(event, context):
     return response
 
 
-def handle_setup_dialog_intent(user_id, slots, dialog_state):
+def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup_controller):
     response = {
         'version': '1.0',
         'sessionAttributes': {},
@@ -59,10 +59,30 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state):
     }
 
     if dialog_state == 'COMPLETED':
-        response['response']['outputSpeech'] = {
-            'type': 'PlainText',
-            'text': 'All done.'
-        }
+        line_id = slots['line']['value']
+        if line_id == 'j':
+            line_id = 'KJ'
+        long_direction = slots['direction']['value']
+        direction = 'IB' if long_direction == 'inbound' else 'OB'
+        first_street = slots['firstStreet']['value']
+        second_street = slots['secondStreet']['value']
+        first_st = parse_street(first_street)
+        second_st = parse_street(second_street)
+        stop_name = '{} & {}'.format(first_st, second_st)
+        long_stop_name = '{} and {}'.format(first_street, second_street)
+
+        home_stop_id = setup_controller.get_stop_id(line_id, stop_name, direction)
+        user = user_service.get_user(user_id)
+        if user is None:
+            user = {'id': user_id, 'homeStopId': home_stop_id}
+            user_service.add_user(user)
+        else:
+            user_service.update_user(user_id, homeStopId=home_stop_id)
+
+        output_speech_text = 'I\'ve set your home stop to {} on the {} {} line'.format(long_stop_name, line_id,
+                                                                                       long_direction)
+
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
     else:
         response['response']['directives'] = [
             {
