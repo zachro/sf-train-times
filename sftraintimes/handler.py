@@ -21,6 +21,9 @@ def handle_request(event, context):
         if intent_name == 'SetHomeStopByIdIntent':
             home_stop_id = event['request']['intent']['slots']['stopId']['value']
             response = set_home_stop_id(user_id, home_stop_id, APP_CONFIG.get_user_controller())
+        elif intent_name == 'SetHomeLineIntent':
+            home_line = event['request']['intent']['slots']['line']['value']
+            response = set_home_line(user_id, home_line, APP_CONFIG.get_user_controller())
         elif intent_name == 'GetNextTrainIntent':
             response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
 
@@ -47,6 +50,21 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
         user_controller.update_user(user_id, homeStopId=home_stop_id)
 
     output_speech_text = 'I\'ve set your home stop to {}.'.format(home_stop_id)
+    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+
+    return response
+
+
+def set_home_line(user_id, home_line, user_controller):
+    user = user_controller.get_user(user_id)
+
+    if user is None:
+        user = {'id': user_id, 'homeLine': home_line}
+        user_controller.add_user(user)
+    else:
+        user_controller.update_user(user_id, homeLine=home_line)
+
+    output_speech_text = 'I\'ve set your home line to {}.'.format(home_line)
     response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
 
     return response
