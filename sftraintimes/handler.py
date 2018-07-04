@@ -15,7 +15,7 @@ def handle_request(event, context):
 
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']
-    slots = event['request']['intent']['slots']
+    slots = event['request']['intent'].get('slots')
     response = {}
 
     try:
