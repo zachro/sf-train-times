@@ -18,4 +18,4 @@ class AppConfig:
 
 def get_five_eleven_api_key():
     keys = boto3.client('s3').get_object(Bucket=KEY_STORAGE_BUCKET, Key=KEY_STORAGE_PATH)['Body'].read().decode('utf-8')
-    return json.loads(keys)['api-key']
+    return json.loads(keys)['api_key']
