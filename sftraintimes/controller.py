@@ -1,13 +1,14 @@
+from sftraintimes.service import LineService
+
+
 class SetupController:
     """Controller class for setting user's home stop."""
-    AGENCY = 'SF'
-
-    def __init__(self, line_controller):
+    def __init__(self, line_service=LineService()):
         """
         Constructs a new SetupController instance.
-        :param line_controller: A controller.LineController instance for getting line patterns.
+        :param line_service: A controller.LineController instance for getting line patterns.
         """
-        self.line_controller = line_controller
+        self.line_service = line_service
 
     def get_stop_id(self, line_id, stop_name, direction):
         """
@@ -17,7 +18,7 @@ class SetupController:
         :param direction: The direction of the specific stop (IB or OB)
         :return: The ID of the stop, or None if it cannot be found.
         """
-        patterns = self.line_controller.get_patterns_for_line(self.AGENCY, line_id)
+        patterns = self.line_service.get_patterns_for_line(line_id)
 
         for journey_pattern in patterns:
             if journey_pattern['DirectionRef'] == direction:

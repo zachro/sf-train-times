@@ -1,8 +1,10 @@
-from sftraintimes.config import AppConfig
 import datetime
+
+from sftraintimes.config import AppConfig
+from sftraintimes.controller import SetupController
+from sftraintimes.service import UserService, StopService
 from sftraintimes.util import ResponseBuilder, parse_datetime
 
-APP_CONFIG = AppConfig()
 LOG = AppConfig.get_logger()
 
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
@@ -21,24 +23,22 @@ def handle_request(event, context):
 
     try:
         if intent_name == 'SetHomeStopByIdIntent':
-            response = handle_set_home_stop_by_id_intent(user_id, slots, APP_CONFIG.get_user_service())
+            response = handle_set_home_stop_by_id_intent(user_id, slots, UserService())
 
         elif intent_name == 'SetHomeLineIntent':
-            response = handle_set_home_line_intent(user_id, slots, APP_CONFIG.get_user_service())
+            response = handle_set_home_line_intent(user_id, slots, UserService())
 
         elif intent_name == 'SetHomeDirectionIntent':
-            response = handle_set_home_direction_intent(user_id, slots, APP_CONFIG.get_user_service())
+            response = handle_set_home_direction_intent(user_id, slots, UserService())
 
         elif intent_name == 'SetHomeStopIntent':
-            response = handle_set_home_stop_intent(user_id, slots, APP_CONFIG.get_user_service(),
-                                                   APP_CONFIG.get_setup_controller())
+            response = handle_set_home_stop_intent(user_id, slots, UserService(), SetupController())
 
         elif intent_name == 'SetupDialogIntent':
             response = handle_setup_dialog_intent(user_id, slots, dialog_state)
 
         elif intent_name == 'GetNextTrainIntent':
-            response = handle_get_next_train_intent(user_id, APP_CONFIG.get_stop_service(),
-                                                    APP_CONFIG.get_user_service())
+            response = handle_get_next_train_intent(user_id, StopService(), UserService())
 
     except Exception as e:
         LOG.error(e)

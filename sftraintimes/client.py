@@ -1,6 +1,8 @@
 import json
+
 from botocore.vendored import requests
 
+from sftraintimes.config import get_five_eleven_api_key
 
 REAL_TIME_STOP_MONITORING_URL = 'http://api.511.org/transit/StopMonitoring'
 LINE_PATTERN_URL = 'http://api.511.org/transit/patterns'
@@ -8,7 +10,7 @@ LINE_PATTERN_URL = 'http://api.511.org/transit/patterns'
 
 class FiveElevenClient:
     """Client for making calls to 511.org APIs."""
-    def __init__(self, api_key):
+    def __init__(self, api_key=get_five_eleven_api_key()):
         """Constructs a new FiveElevenClient instance."""
         self.api_key = api_key
 

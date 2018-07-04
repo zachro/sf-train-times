@@ -1,10 +1,11 @@
-CITY_NAME_INDEX = 'cityName-index'
+import boto3
 
 
 class UserDAO:
     """Contains methods for getting, adding, and updating users in the database."""
+    USER_TABLE_NAME = 'TrainUser-test'
 
-    def __init__(self, table):
+    def __init__(self, table=boto3.resource('dynamodb').Table(USER_TABLE_NAME)):
         """
         Constructs a new UserDAO instance.
         :param table: A boto3.resources.factory.dynamodb.Table instance representing the user table.
