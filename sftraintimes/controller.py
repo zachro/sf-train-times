@@ -52,3 +52,40 @@ class StopController:
         response = self.five_eleven_client.get_real_time_stop_monitoring(agency, stop_id)
 
         return response['ServiceDelivery']['StopMonitoringDelivery']['MonitoredStopVisit']
+
+
+class LineController:
+    def __init__(self, five_eleven_client):
+        self.five_eleven_client = five_eleven_client
+
+    def get_patterns_for_line(self, agency, line_id):
+        response = self.five_eleven_client.get_patterns_for_line(agency, line_id)
+
+        return response['journeyPatterns']
+
+
+class SetupController:
+    AGENCY = 'SF'
+
+    def __init__(self, line_controller, stop_controller, user_controller):
+        self.line_controller = line_controller
+        self.stop_controller = stop_controller
+        self.user_controller = user_controller
+
+    def get_stop_id(self, line_id, stop_name, direction):
+        patterns = self.line_controller.get_patterns_for_line(self.AGENCY, line_id)
+
+        for journey_pattern in patterns:
+            if journey_pattern['DirectionRef'] == direction:
+
+                stop_points = journey_pattern['PointsInSequence']['StopPointInJourneyPattern']
+                for stop_point in stop_points:
+                    if stop_point['Name'] == stop_name:
+                        return stop_point['ScheduledStopPointRef']
+
+                timing_points = journey_pattern['PointsInSequence']['TimingPointInJourneyPattern']
+                for timing_point in timing_points:
+                    if timing_point['Name'] == stop_name:
+                        return timing_point['ScheduledStopPointRef']
+
+        return None

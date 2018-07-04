@@ -3,6 +3,7 @@ from botocore.vendored import requests
 
 
 REAL_TIME_STOP_MONITORING_URL = 'http://api.511.org/transit/StopMonitoring'
+LINE_PATTERN_URL = 'http://api.511.org/transit/patterns'
 
 
 class FiveElevenClient:
@@ -24,6 +25,20 @@ class FiveElevenClient:
             'stopCode': stop_id
         }
         response_object = requests.get(REAL_TIME_STOP_MONITORING_URL, params=query_params)
+        if response_object.status_code != 200:
+            raise RuntimeError('Response returned an unexpected status code. Response: {}'.format(response_object))
+
+        response = self._parse_json(response_object.text)
+
+        return response
+
+    def get_patterns_for_line(self, agency, line_id):
+        query_params = {
+            'api_key': self.api_key,
+            'operator_id': agency,
+            'line_id': line_id
+        }
+        response_object = requests.get(LINE_PATTERN_URL, params=query_params)
         if response_object.status_code != 200:
             raise RuntimeError('Response returned an unexpected status code. Response: {}'.format(response_object))
 
