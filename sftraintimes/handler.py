@@ -1,6 +1,6 @@
 from sftraintimes import config as config
 import datetime
-from sftraintimes.util import TrainTimesResponseBuilder, parse_datetime
+from sftraintimes.util import ResponseBuilder, parse_datetime
 
 APP_CONFIG = config.AppConfig()
 LOG = config.AppConfig.get_logger()
@@ -95,7 +95,7 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
         user_controller.update_user(user_id, homeStopId=home_stop_id)
 
     output_speech_text = 'I\'ve set your home stop to {}.'.format(home_stop_id)
-    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+    response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
@@ -117,7 +117,7 @@ def set_home_line(user_id, home_line, user_controller):
         user_controller.update_user(user_id, homeLine=home_line.upper())
 
     output_speech_text = 'I\'ve set your home line to {}.'.format(home_line)
-    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+    response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
@@ -141,7 +141,7 @@ def set_home_direction(user_id, direction, user_controller):
         user_controller.update_user(user_id, direction=direction_id)
 
     output_speech_text = 'I\'ve set your home direction to {}.'.format(direction)
-    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+    response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
@@ -162,14 +162,14 @@ def set_home_stop(user_id, first_street, second_street, user_controller, setup_c
 
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home line and direction before setting your home stop.'
-        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text)
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
         return response
 
     stop_id = setup_controller.get_stop_id(user['homeLine'], '{} & {}'.format(first_st, second_st), user['direction'])
 
     user_controller.update_user(user_id, homeStopId=stop_id)
     output_speech_text = 'I\'ve set your home stop to {} and {}'.format(first_street, second_street)
-    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+    response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
@@ -189,7 +189,7 @@ def get_next_train(user_id, stop_controller, user_controller):
     user = user_controller.get_user(user_id)
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home stop before asking for train times.'
-        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
         return response
 
     next_stops = stop_controller.get_upcoming_visits(user['provider'], user['homeStopId'])
@@ -199,10 +199,10 @@ def get_next_train(user_id, stop_controller, user_controller):
         second_visit_diff = _get_wait_time(
             next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
         output_speech_text = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, second_visit_diff)
-        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
     else:
         output_speech_text = NEXT_TRAIN_MESSAGE.format(diff_min)
-        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
