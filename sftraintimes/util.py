@@ -36,3 +36,20 @@ def parse_datetime(iso_date):
     second = int(iso_date[17:19])
 
     return datetime(year, month, day, hour, minute, second)
+
+
+def parse_street(literal_street):
+    """
+    Parses an AMAZON.StreetName slot from Alexa into a street name matching SFMTA formats. Example: 'market street' ->
+    'market st', 'ocean avenue' -> 'ocean ave'
+    :param literal_street: The street name as received from Alexa.
+    :return: The street name formatted for matching against SFMTA stops.
+    """
+    if 'street' in literal_street:
+        return literal_street.replace('street', 'st')
+    if 'avenue' in literal_street:
+        return literal_street.replace('avenue', 'ave')
+    if 'boulevard' in literal_street:
+        return literal_street.replace('boulevard', 'blvd')
+    if 'drive' in literal_street:
+        return literal_street.replace('drive', 'dr')

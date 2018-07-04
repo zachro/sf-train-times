@@ -1,11 +1,11 @@
 import datetime
 
-from sftraintimes.config import AppConfig
+import sftraintimes.config as config
 from sftraintimes.controller import SetupController
 from sftraintimes.service import UserService, StopService
-from sftraintimes.util import ResponseBuilder, parse_datetime
+from sftraintimes.util import ResponseBuilder, parse_datetime, parse_street
 
-LOG = AppConfig.get_logger()
+LOG = config.get_logger()
 
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
 NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. After that, there\'s one in {} minutes.'
@@ -156,8 +156,8 @@ def handle_set_home_stop_intent(user_id, slots, user_service, setup_controller):
     """
     first_street = slots['firstStreet']['value']
     second_street = slots['secondStreet']['value']
-    first_st = _parse_street(first_street)
-    second_st = _parse_street(second_street)
+    first_st = parse_street(first_street)
+    second_st = parse_street(second_street)
     user = user_service.get_user(user_id)
 
     if user is None:
@@ -172,10 +172,6 @@ def handle_set_home_stop_intent(user_id, slots, user_service, setup_controller):
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
-
-
-def _parse_street(street):
-    return street.replace('street', 'st')
 
 
 def handle_get_next_train_intent(user_id, stop_controller, user_service):
