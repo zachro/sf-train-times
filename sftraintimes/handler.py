@@ -21,24 +21,24 @@ def handle_request(event, context):
 
     try:
         if intent_name == 'SetHomeStopByIdIntent':
-            response = handle_set_home_stop_by_id_intent(user_id, slots, APP_CONFIG.get_user_controller())
+            response = handle_set_home_stop_by_id_intent(user_id, slots, APP_CONFIG.get_user_service())
 
         elif intent_name == 'SetHomeLineIntent':
-            response = handle_set_home_line_intent(user_id, slots, APP_CONFIG.get_user_controller())
+            response = handle_set_home_line_intent(user_id, slots, APP_CONFIG.get_user_service())
 
         elif intent_name == 'SetHomeDirectionIntent':
-            response = handle_set_home_direction_intent(user_id, slots, APP_CONFIG.get_user_controller())
+            response = handle_set_home_direction_intent(user_id, slots, APP_CONFIG.get_user_service())
 
         elif intent_name == 'SetHomeStopIntent':
-            response = handle_set_home_stop_intent(user_id, slots, APP_CONFIG.get_user_controller(),
+            response = handle_set_home_stop_intent(user_id, slots, APP_CONFIG.get_user_service(),
                                                    APP_CONFIG.get_setup_controller())
 
         elif intent_name == 'SetupDialogIntent':
             response = handle_setup_dialog_intent(user_id, slots, dialog_state)
 
         elif intent_name == 'GetNextTrainIntent':
-            response = handle_get_next_train_intent(user_id, APP_CONFIG.get_stop_controller(),
-                                                    APP_CONFIG.get_user_controller())
+            response = handle_get_next_train_intent(user_id, APP_CONFIG.get_stop_service(),
+                                                    APP_CONFIG.get_user_service())
 
     except Exception as e:
         LOG.error(e)
@@ -74,22 +74,22 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state):
     return response
 
 
-def handle_set_home_stop_by_id_intent(user_id, slots, user_controller):
+def handle_set_home_stop_by_id_intent(user_id, slots, user_service):
     """
     Handles a SetHomeStopIntent request.
     :param user_id: The ID of the device making the request.
     :param slots: The slots contained in the IntentRequest.
-    :param user_controller: A controller.UserController instance.
+    :param user_service: A UserService instance.
     :return: A dict containing the Alexa response.
     """
     home_stop_id = slots['stopId']['value']
-    user = user_controller.get_user(user_id)
+    user = user_service.get_user(user_id)
 
     if user is None:
         user = {'id': user_id, 'homeStopId': home_stop_id}
-        user_controller.add_user(user)
+        user_service.add_user(user)
     else:
-        user_controller.update_user(user_id, homeStopId=home_stop_id)
+        user_service.update_user(user_id, homeStopId=home_stop_id)
 
     output_speech_text = 'I\'ve set your home stop to {}.'.format(home_stop_id)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
@@ -97,22 +97,22 @@ def handle_set_home_stop_by_id_intent(user_id, slots, user_controller):
     return response
 
 
-def handle_set_home_line_intent(user_id, slots, user_controller):
+def handle_set_home_line_intent(user_id, slots, user_service):
     """
     Handles a SetHomeLineIntent request.
     :param user_id: The ID of the device making the request.
     :param slots: The slots contained in the IntentRequest.
-    :param user_controller: A controller.UserController instance.
+    :param user_service: A UserService instance.
     :return: A dict containing the Alexa response.
     """
     home_line = slots['line']['value']
-    user = user_controller.get_user(user_id)
+    user = user_service.get_user(user_id)
 
     if user is None:
         user = {'id': user_id, 'homeLine': home_line}
-        user_controller.add_user(user)
+        user_service.add_user(user)
     else:
-        user_controller.update_user(user_id, homeLine=home_line.upper())
+        user_service.update_user(user_id, homeLine=home_line.upper())
 
     output_speech_text = 'I\'ve set your home line to {}.'.format(home_line)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
@@ -120,24 +120,24 @@ def handle_set_home_line_intent(user_id, slots, user_controller):
     return response
 
 
-def handle_set_home_direction_intent(user_id, slots, user_controller):
+def handle_set_home_direction_intent(user_id, slots, user_service):
     """
     Handles a SetHomeDirectionIntent request.
     :param user_id: The ID of the device making the request.
     :param slots: The slots contained in the IntentRequest.
-    :param user_controller: A controller.UserController instance.
+    :param user_service: A UserService instance.
     :return: A dict containing the Alexa response.
     """
     direction = slots['direction']['value']
     direction_id = 'IB' if direction == 'inbound' else 'OB'
 
-    user = user_controller.get_user(user_id)
+    user = user_service.get_user(user_id)
 
     if user is None:
         user = {'id': user_id, 'direction': direction_id}
-        user_controller.add_user(user)
+        user_service.add_user(user)
     else:
-        user_controller.update_user(user_id, direction=direction_id)
+        user_service.update_user(user_id, direction=direction_id)
 
     output_speech_text = 'I\'ve set your home direction to {}.'.format(direction)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
@@ -145,12 +145,12 @@ def handle_set_home_direction_intent(user_id, slots, user_controller):
     return response
 
 
-def handle_set_home_stop_intent(user_id, slots, user_controller, setup_controller):
+def handle_set_home_stop_intent(user_id, slots, user_service, setup_controller):
     """
     Handles a SetHomeStopIntent request.
     :param user_id: The ID of the device making the request.
     :param slots: The slots contained in the IntentRequest.
-    :param user_controller: A controller.UserController instance.
+    :param user_service: A UserService instance.
     :param setup_controller: A controller.SetupController instance.
     :return: A dict containing the Alexa response.
     """
@@ -158,7 +158,7 @@ def handle_set_home_stop_intent(user_id, slots, user_controller, setup_controlle
     second_street = slots['secondStreet']['value']
     first_st = _parse_street(first_street)
     second_st = _parse_street(second_street)
-    user = user_controller.get_user(user_id)
+    user = user_service.get_user(user_id)
 
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home line and direction before setting your home stop.'
@@ -167,7 +167,7 @@ def handle_set_home_stop_intent(user_id, slots, user_controller, setup_controlle
 
     stop_id = setup_controller.get_stop_id(user['homeLine'], '{} & {}'.format(first_st, second_st), user['direction'])
 
-    user_controller.update_user(user_id, homeStopId=stop_id)
+    user_service.update_user(user_id, homeStopId=stop_id)
     output_speech_text = 'I\'ve set your home stop to {} and {}'.format(first_street, second_street)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
@@ -178,27 +178,26 @@ def _parse_street(street):
     return street.replace('street', 'st')
 
 
-def handle_get_next_train_intent(user_id, stop_controller, user_controller):
+def handle_get_next_train_intent(user_id, stop_controller, user_service):
     """
     Handles a GetNextTrainIntent request.
     :param user_id: The ID of the device making the request.
     :param stop_controller: A controller.StopController instance for getting train information.
-    :param user_controller: A controller.UserController instance.
+    :param user_service: A UserService instance.
     :return: A dict containing the Alexa response.
     """
-    user = user_controller.get_user(user_id)
+    user = user_service.get_user(user_id)
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home stop before asking for train times.'
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
         return response
 
-    next_stops = stop_controller.get_upcoming_visits(user['provider'], user['homeStopId'])
+    next_stops = stop_controller.get_upcoming_visits(user['homeStopId'])
     diff_min = _get_wait_time(next_stops[0]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
 
     if diff_min < 5:
-        second_visit_diff = _get_wait_time(
-            next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
-        output_speech_text = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, second_visit_diff)
+        next_visit_diff = _get_wait_time(next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
+        output_speech_text = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, next_visit_diff)
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
     else:
         output_speech_text = NEXT_TRAIN_MESSAGE.format(diff_min)
