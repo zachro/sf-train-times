@@ -19,7 +19,6 @@ def handle_request(event, context):
     intent_name = event['request']['intent']['name']
     slots = event['request']['intent'].get('slots')
     dialog_state = event['request'].get('dialogState')
-    response = {}
 
     try:
         if intent_name == 'SetHomeStopByIdIntent':
@@ -40,8 +39,14 @@ def handle_request(event, context):
         elif intent_name == 'GetNextTrainIntent':
             response = handle_get_next_train_intent(user_id, StopService(), UserService())
 
+        else:
+            output_speech_text = 'Sorry, I don\'t think I can help with that.'
+            response = ResponseBuilder(output_speech_text=output_speech_text).build()
+
     except Exception as e:
         LOG.error(e)
+        output_speech_text = 'Sorry, something went wrong.'
+        response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
 
