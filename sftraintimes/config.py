@@ -15,6 +15,7 @@ class AppConfig:
         self.s3_client = boto3.client('s3')
         self.user_controller = None
         self.stop_controller = None
+        self.setup_controller = None
 
     def get_user_controller(self):
         """Returns a UserController instance."""
@@ -36,6 +37,17 @@ class AppConfig:
 
         self.stop_controller = controller.StopController(client.FiveElevenClient(api_key))
         return self.stop_controller
+
+    def get_setup_controller(self):
+        if self.setup_controller is not None:
+            return self.setup_controller
+
+        keys = self.s3_client.get_object(Bucket=KEY_STORAGE_BUCKET, Key=KEY_STORAGE_PATH)['Body'].read().decode('utf-8')
+        api_key = json.loads(keys)['api_key']
+
+        line_controller = controller.LineController(client.FiveElevenClient(api_key))
+        self.setup_controller = controller.SetupController(line_controller)
+        return self.setup_controller
 
     @staticmethod
     def get_logger():

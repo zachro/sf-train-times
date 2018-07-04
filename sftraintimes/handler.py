@@ -24,6 +24,14 @@ def handle_request(event, context):
         elif intent_name == 'SetHomeLineIntent':
             home_line = event['request']['intent']['slots']['line']['value']
             response = set_home_line(user_id, home_line, APP_CONFIG.get_user_controller())
+        elif intent_name == 'SetHomeDirectionIntent':
+            home_direction = event['request']['intent']['slots']['direction']['value']
+            response = set_home_direction(user_id, home_direction, APP_CONFIG.get_user_controller())
+        elif intent_name == 'SetHomeStopIntent':
+            first_street = event['request']['intent']['slots']['firstStreet']['value']
+            second_street = event['request']['intent']['slots']['secondStreet']['value']
+            response = set_home_stop(user_id, first_street, second_street, APP_CONFIG.get_user_controller(),
+                                     APP_CONFIG.get_setup_controller())
         elif intent_name == 'GetNextTrainIntent':
             response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
 
@@ -70,6 +78,46 @@ def set_home_line(user_id, home_line, user_controller):
     return response
 
 
+def set_home_direction(user_id, direction, user_controller):
+    direction_id = 'IB' if direction == 'inbound' else 'OB'
+
+    user = user_controller.get_user(user_id)
+
+    if user is None:
+        user = {'id': user_id, 'direction': direction_id}
+        user_controller.add_user(user)
+    else:
+        user_controller.update_user(user_id, direction=direction_id)
+
+    output_speech_text = 'I\'ve set your home direction to {}.'.format(direction)
+    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+
+    return response
+
+
+def set_home_stop(user_id, first_street, second_street, user_controller, setup_controller):
+    first_st = _parse_street(first_street)
+    second_st = _parse_street(second_street)
+    user = user_controller.get_user(user_id)
+
+    if user is None:
+        output_speech_text = 'Sorry, you\'ll need to set your home line and direction before setting your home stop.'
+        response = TrainTimesResponseBuilder().with_output_speech(output_speech_text)
+        return response
+
+    stop_id = setup_controller.get_stop_id(user['homeLine'], '{} & {}'.format(first_st, second_st), user['direction'])
+
+    user_controller.update_user(user_id, homeStopId=stop_id)
+    output_speech_text = 'I\'ve set your home stop to {} and {}'.format(first_street, second_street)
+    response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
+
+    return response
+
+
+def _parse_street(street):
+    return street.replace('street', 'st')
+
+
 def get_next_train(user_id, stop_controller, user_controller):
     """
     Handles a GetNextTrainIntent request.
@@ -88,7 +136,8 @@ def get_next_train(user_id, stop_controller, user_controller):
     diff_min = _get_wait_time(next_stops[0]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
 
     if diff_min < 5:
-        second_visit_diff = _get_wait_time(next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
+        second_visit_diff = _get_wait_time(
+            next_stops[1]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
         output_speech_text = NEXT_TWO_TRAINS_MESSAGE.format(diff_min, second_visit_diff)
         response = TrainTimesResponseBuilder().with_output_speech(output_speech_text).build()
     else:
