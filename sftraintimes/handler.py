@@ -1,9 +1,9 @@
-from sftraintimes import config as config
+from sftraintimes.config import AppConfig
 import datetime
 from sftraintimes.util import ResponseBuilder, parse_datetime
 
-APP_CONFIG = config.AppConfig()
-LOG = config.AppConfig.get_logger()
+APP_CONFIG = AppConfig()
+LOG = AppConfig.get_logger()
 
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
 NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. After that, there\'s one in {} minutes.'
@@ -21,28 +21,24 @@ def handle_request(event, context):
 
     try:
         if intent_name == 'SetHomeStopByIdIntent':
-            home_stop_id = slots['stopId']['value']
-            response = set_home_stop_id(user_id, home_stop_id, APP_CONFIG.get_user_controller())
+            response = handle_set_home_stop_by_id_intent(user_id, slots, APP_CONFIG.get_user_controller())
 
         elif intent_name == 'SetHomeLineIntent':
-            home_line = slots['line']['value']
-            response = set_home_line(user_id, home_line, APP_CONFIG.get_user_controller())
+            response = handle_set_home_line_intent(user_id, slots, APP_CONFIG.get_user_controller())
 
         elif intent_name == 'SetHomeDirectionIntent':
-            home_direction = slots['direction']['value']
-            response = set_home_direction(user_id, home_direction, APP_CONFIG.get_user_controller())
+            response = handle_set_home_direction_intent(user_id, slots, APP_CONFIG.get_user_controller())
 
         elif intent_name == 'SetHomeStopIntent':
-            first_street = slots['firstStreet']['value']
-            second_street = slots['secondStreet']['value']
-            response = set_home_stop(user_id, first_street, second_street, APP_CONFIG.get_user_controller(),
-                                     APP_CONFIG.get_setup_controller())
+            response = handle_set_home_stop_intent(user_id, slots, APP_CONFIG.get_user_controller(),
+                                                   APP_CONFIG.get_setup_controller())
 
         elif intent_name == 'SetupDialogIntent':
-            response = handle_setup_dialog(user_id, slots, dialog_state)
+            response = handle_setup_dialog_intent(user_id, slots, dialog_state)
 
         elif intent_name == 'GetNextTrainIntent':
-            response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
+            response = handle_get_next_train_intent(user_id, APP_CONFIG.get_stop_controller(),
+                                                    APP_CONFIG.get_user_controller())
 
     except Exception as e:
         LOG.error(e)
@@ -50,7 +46,7 @@ def handle_request(event, context):
     return response
 
 
-def handle_setup_dialog(user_id, slots, dialog_state):
+def handle_setup_dialog_intent(user_id, slots, dialog_state):
     response = {
         'version': '1.0',
         'sessionAttributes': {},
@@ -78,14 +74,15 @@ def handle_setup_dialog(user_id, slots, dialog_state):
     return response
 
 
-def set_home_stop_id(user_id, home_stop_id, user_controller):
+def handle_set_home_stop_by_id_intent(user_id, slots, user_controller):
     """
     Handles a SetHomeStopIntent request.
     :param user_id: The ID of the device making the request.
-    :param home_stop_id: The ID of the user's home stop.
+    :param slots: The slots contained in the IntentRequest.
     :param user_controller: A controller.UserController instance.
     :return: A dict containing the Alexa response.
     """
+    home_stop_id = slots['stopId']['value']
     user = user_controller.get_user(user_id)
 
     if user is None:
@@ -100,14 +97,15 @@ def set_home_stop_id(user_id, home_stop_id, user_controller):
     return response
 
 
-def set_home_line(user_id, home_line, user_controller):
+def handle_set_home_line_intent(user_id, slots, user_controller):
     """
     Handles a SetHomeLineIntent request.
     :param user_id: The ID of the device making the request.
-    :param home_line: The name of the line (K, J, M, etc.)
+    :param slots: The slots contained in the IntentRequest.
     :param user_controller: A controller.UserController instance.
     :return: A dict containing the Alexa response.
     """
+    home_line = slots['line']['value']
     user = user_controller.get_user(user_id)
 
     if user is None:
@@ -122,14 +120,15 @@ def set_home_line(user_id, home_line, user_controller):
     return response
 
 
-def set_home_direction(user_id, direction, user_controller):
+def handle_set_home_direction_intent(user_id, slots, user_controller):
     """
     Handles a SetHomeDirectionIntent request.
     :param user_id: The ID of the device making the request.
-    :param direction: The direction: inbound or outbound.
+    :param slots: The slots contained in the IntentRequest.
     :param user_controller: A controller.UserController instance.
     :return: A dict containing the Alexa response.
     """
+    direction = slots['direction']['value']
     direction_id = 'IB' if direction == 'inbound' else 'OB'
 
     user = user_controller.get_user(user_id)
@@ -146,16 +145,17 @@ def set_home_direction(user_id, direction, user_controller):
     return response
 
 
-def set_home_stop(user_id, first_street, second_street, user_controller, setup_controller):
+def handle_set_home_stop_intent(user_id, slots, user_controller, setup_controller):
     """
     Handles a SetHomeStopIntent request.
     :param user_id: The ID of the device making the request.
-    :param first_street: The first cross street of the stop.
-    :param second_street: The second cross street of the stop.
+    :param slots: The slots contained in the IntentRequest.
     :param user_controller: A controller.UserController instance.
     :param setup_controller: A controller.SetupController instance.
     :return: A dict containing the Alexa response.
     """
+    first_street = slots['firstStreet']['value']
+    second_street = slots['secondStreet']['value']
     first_st = _parse_street(first_street)
     second_st = _parse_street(second_street)
     user = user_controller.get_user(user_id)
@@ -178,7 +178,7 @@ def _parse_street(street):
     return street.replace('street', 'st')
 
 
-def get_next_train(user_id, stop_controller, user_controller):
+def handle_get_next_train_intent(user_id, stop_controller, user_controller):
     """
     Handles a GetNextTrainIntent request.
     :param user_id: The ID of the device making the request.
