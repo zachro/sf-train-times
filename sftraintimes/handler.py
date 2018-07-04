@@ -16,6 +16,7 @@ def handle_request(event, context):
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']
     slots = event['request']['intent'].get('slots')
+    dialog_state = event['request'].get('dialogState')
     response = {}
 
     try:
@@ -37,11 +38,42 @@ def handle_request(event, context):
             response = set_home_stop(user_id, first_street, second_street, APP_CONFIG.get_user_controller(),
                                      APP_CONFIG.get_setup_controller())
 
+        elif intent_name == 'SetupDialogIntent':
+            response = handle_setup_dialog(user_id, slots, dialog_state)
+
         elif intent_name == 'GetNextTrainIntent':
             response = get_next_train(user_id, APP_CONFIG.get_stop_controller(), APP_CONFIG.get_user_controller())
 
     except Exception as e:
         LOG.error(e)
+
+    return response
+
+
+def handle_setup_dialog(user_id, slots, dialog_state):
+    response = {
+        'version': '1.0',
+        'sessionAttributes': {},
+        'response': {}
+    }
+
+    if dialog_state == 'COMPLETED':
+        response['response']['outputSpeech'] = {
+            'type': 'PlainText',
+            'text': 'All done.'
+        }
+    else:
+        response['response']['directives'] = [
+            {
+                'type': 'Dialog.Delegate',
+                'updatedIntent': {
+                    'name': 'SetupDialogIntent',
+                    'confirmationStatus': 'NONE',
+                }
+            }
+        ]
+        response['response']['shouldEndSession'] = False
+        response['response']['directives'][0]['updatedIntent']['slots'] = slots
 
     return response
 
