@@ -24,12 +24,6 @@ def handle_request(event, context):
         if intent_name == 'SetHomeStopByIdIntent':
             response = handle_set_home_stop_by_id_intent(user_id, slots, UserService())
 
-        elif intent_name == 'SetHomeLineIntent':
-            response = handle_set_home_line_intent(user_id, slots, UserService())
-
-        elif intent_name == 'SetHomeDirectionIntent':
-            response = handle_set_home_direction_intent(user_id, slots, UserService())
-
         elif intent_name == 'SetHomeStopIntent':
             response = handle_setup_dialog_intent(user_id, slots, dialog_state, UserService(), SetupController())
 
@@ -121,54 +115,6 @@ def handle_set_home_stop_by_id_intent(user_id, slots, user_service):
         user_service.update_user(user_id, homeStopId=home_stop_id)
 
     output_speech_text = 'I\'ve set your home stop to {}.'.format(home_stop_id)
-    response = ResponseBuilder(output_speech_text=output_speech_text).build()
-
-    return response
-
-
-def handle_set_home_line_intent(user_id, slots, user_service):
-    """
-    Handles a SetHomeLineIntent request.
-    :param user_id: The ID of the device making the request.
-    :param slots: The slots contained in the IntentRequest.
-    :param user_service: A UserService instance.
-    :return: A dict containing the Alexa response.
-    """
-    home_line = slots['line']['value']
-    user = user_service.get_user(user_id)
-
-    if user is None:
-        user = {'id': user_id, 'homeLine': home_line}
-        user_service.add_user(user)
-    else:
-        user_service.update_user(user_id, homeLine=home_line.upper())
-
-    output_speech_text = 'I\'ve set your home line to {}.'.format(home_line)
-    response = ResponseBuilder(output_speech_text=output_speech_text).build()
-
-    return response
-
-
-def handle_set_home_direction_intent(user_id, slots, user_service):
-    """
-    Handles a SetHomeDirectionIntent request.
-    :param user_id: The ID of the device making the request.
-    :param slots: The slots contained in the IntentRequest.
-    :param user_service: A UserService instance.
-    :return: A dict containing the Alexa response.
-    """
-    direction = slots['direction']['value']
-    direction_id = 'IB' if direction == 'inbound' else 'OB'
-
-    user = user_service.get_user(user_id)
-
-    if user is None:
-        user = {'id': user_id, 'direction': direction_id}
-        user_service.add_user(user)
-    else:
-        user_service.update_user(user_id, direction=direction_id)
-
-    output_speech_text = 'I\'ve set your home direction to {}.'.format(direction)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
