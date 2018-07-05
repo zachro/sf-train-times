@@ -3,7 +3,7 @@ import logging
 
 import boto3
 
-KEY_STORAGE_BUCKET = 'test-key-storage'
+KEY_STORAGE_BUCKET = 'api-key-storage'
 KEY_STORAGE_PATH = 'five_eleven_keys.json'
 
 

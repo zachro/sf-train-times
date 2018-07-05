@@ -12,12 +12,12 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
       Resource:
-        - arn:aws:dynamodb:us-west-2:109011288894:table/TrainUser-test
+        - arn:aws:dynamodb:us-west-2:*:table/User
     - Effect: Allow
       Action:
         - s3:GetObject
       Resource:
-        - arn:aws:s3:::test-key-storage/*
+        - arn:aws:s3:::api-key-storage/*
 
 functions:
   handleRequest:

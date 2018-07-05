@@ -3,7 +3,7 @@ import boto3
 
 class UserDAO:
     """Contains methods for getting, adding, and updating users in the database."""
-    USER_TABLE_NAME = 'TrainUser-test'
+    USER_TABLE_NAME = 'User'
 
     def __init__(self, table=boto3.resource('dynamodb').Table(USER_TABLE_NAME)):
         """
