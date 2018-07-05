@@ -59,11 +59,18 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
     }
 
     if dialog_state == 'COMPLETED':
-        line_id = slots['line']['value']
-        if line_id == 'j':
+        line_id = slots['line']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['name']
+        # Temporary workaround for line change
+        if line_id == 'J' or line_id == 'K':
             line_id = 'KJ'
-        long_direction = slots['direction']['value']
-        direction = 'IB' if long_direction == 'inbound' else 'OB'
+        LOG.warning(slots)
+
+        direction_heard = slots['direction']['resolutions']['resolutionsPerAuthority'][0].get('values')
+        if direction_heard and direction_heard[0]['value']['name'] == 'OB':
+            direction = 'OB'
+        else:
+            direction = 'IB'
+        long_direction = 'inbound' if direction == 'IB' else 'outbound'
         first_street = slots['firstStreet']['value']
         second_street = slots['secondStreet']['value']
         first_st = parse_street(first_street)
@@ -79,8 +86,8 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
         else:
             user_service.update_user(user_id, homeStopId=home_stop_id)
 
-        output_speech_text = 'I\'ve set your home stop to {} on the {} {} line'.format(long_stop_name, line_id,
-                                                                                       long_direction)
+        output_speech_text = 'I\'ve set your home stop to {} on the {} {} line'.format(long_stop_name, long_direction,
+                                                                                       line_id)
 
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
     else:
