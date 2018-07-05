@@ -13,7 +13,7 @@ NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. Af
 
 def handle_request(event, context):
     """Handles an incoming request from Alexa."""
-    LOG.debug('Received an event: {}'.format(event))
+    LOG.warning('Received an event: {}'.format(event))
 
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']
@@ -31,9 +31,6 @@ def handle_request(event, context):
             response = handle_set_home_direction_intent(user_id, slots, UserService())
 
         elif intent_name == 'SetHomeStopIntent':
-            response = handle_set_home_stop_intent(user_id, slots, UserService(), SetupController())
-
-        elif intent_name == 'SetupDialogIntent':
             response = handle_setup_dialog_intent(user_id, slots, dialog_state, UserService(), SetupController())
 
         elif intent_name == 'GetNextTrainIntent':
@@ -95,7 +92,7 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
             {
                 'type': 'Dialog.Delegate',
                 'updatedIntent': {
-                    'name': 'SetupDialogIntent',
+                    'name': 'SetHomeStopIntent',
                     'confirmationStatus': 'NONE',
                 }
             }
@@ -172,35 +169,6 @@ def handle_set_home_direction_intent(user_id, slots, user_service):
         user_service.update_user(user_id, direction=direction_id)
 
     output_speech_text = 'I\'ve set your home direction to {}.'.format(direction)
-    response = ResponseBuilder(output_speech_text=output_speech_text).build()
-
-    return response
-
-
-def handle_set_home_stop_intent(user_id, slots, user_service, setup_controller):
-    """
-    Handles a SetHomeStopIntent request.
-    :param user_id: The ID of the device making the request.
-    :param slots: The slots contained in the IntentRequest.
-    :param user_service: A UserService instance.
-    :param setup_controller: A controller.SetupController instance.
-    :return: A dict containing the Alexa response.
-    """
-    first_street = slots['firstStreet']['value']
-    second_street = slots['secondStreet']['value']
-    first_st = parse_street(first_street)
-    second_st = parse_street(second_street)
-    user = user_service.get_user(user_id)
-
-    if user is None:
-        output_speech_text = 'Sorry, you\'ll need to set your home line and direction before setting your home stop.'
-        response = ResponseBuilder(output_speech_text=output_speech_text).build()
-        return response
-
-    stop_id = setup_controller.get_stop_id(user['homeLine'], '{} & {}'.format(first_st, second_st), user['direction'])
-
-    user_service.update_user(user_id, homeStopId=stop_id)
-    output_speech_text = 'I\'ve set your home stop to {} and {}'.format(first_street, second_street)
     response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     return response
