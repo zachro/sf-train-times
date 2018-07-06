@@ -6,7 +6,7 @@ provider:
   runtime: python3.6
   region: us-west-2
   stage: ${opt:stage, self:custom.defaultStage}
-  profile: ${self:custom.profiles.${self:provider.stage}}
+  profile: sftraintimesbeta
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -14,7 +14,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
       Resource:
-        - arn:aws:dynamodb:us-west-2:*:table/User
+        - arn:aws:dynamodb:us-west-2:*:table/User-${self:provider.stage}
     - Effect: Allow
       Action:
         - s3:GetObject
@@ -23,9 +23,6 @@ provider:
 
 custom:
   defaultStage: dev
-  profiles:
-    dev: serverless-admin
-    beta: sftraintimesbeta
   alexaSkillIds:
     dev: amzn1.ask.skill.a72af757-c4c7-4c25-98f5-8103bd4cb01a
     beta: amzn1.ask.skill.bd96db50-f341-4a5e-b2b6-02d28fed7c76

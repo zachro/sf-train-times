@@ -1,9 +1,10 @@
 import boto3
+from os import environ
 
 
 class UserDAO:
     """Contains methods for getting, adding, and updating users in the database."""
-    USER_TABLE_NAME = 'User'
+    USER_TABLE_NAME = 'User-' + environ.get('STAGE')
 
     def __init__(self, table=boto3.resource('dynamodb').Table(USER_TABLE_NAME)):
         """
