@@ -21,7 +21,7 @@ class SetupController:
         patterns = self.line_service.get_patterns_for_line(line_id)
 
         for journey_pattern in patterns:
-            if journey_pattern['DirectionRef'] == direction:
+            if journey_pattern['DirectionRef'] == direction.value:
 
                 stop_points = journey_pattern['PointsInSequence']['StopPointInJourneyPattern']
                 for stop_point in stop_points:
