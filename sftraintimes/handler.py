@@ -13,7 +13,7 @@ NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. Af
 
 def handle_request(event, context):
     """Handles an incoming request from Alexa."""
-    LOG.warning('Received an event: {}'.format(event))
+    LOG.debug('Received an event: {}'.format(event))
 
     user_id = event['session']['user']['userId']
     intent_name = event['request']['intent']['name']

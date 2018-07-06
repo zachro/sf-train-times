@@ -1,9 +1,10 @@
 import json
 import logging
+from os import environ
 
 import boto3
 
-KEY_STORAGE_BUCKET = 'api-key-storage'
+KEY_STORAGE_BUCKET = 'sftraintimes-api-key-storage-' + environ.get('STAGE')
 KEY_STORAGE_PATH = 'five_eleven_keys.json'
 
 

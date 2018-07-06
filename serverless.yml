@@ -5,6 +5,8 @@ provider:
   name: aws
   runtime: python3.6
   region: us-west-2
+  stage: ${opt:stage, self:custom.defaultStage}
+  profile: ${self:custom.profiles.${self:provider.stage}}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -17,10 +19,21 @@ provider:
       Action:
         - s3:GetObject
       Resource:
-        - arn:aws:s3:::api-key-storage/*
+        - arn:aws:s3:::*
+
+custom:
+  defaultStage: dev
+  profiles:
+    dev: serverless-admin
+    beta: sftraintimesbeta
+  alexaSkillIds:
+    dev: amzn1.ask.skill.a72af757-c4c7-4c25-98f5-8103bd4cb01a
+    beta: amzn1.ask.skill.bd96db50-f341-4a5e-b2b6-02d28fed7c76
 
 functions:
   handleRequest:
     handler: sftraintimes.handler.handle_request
     events:
-      - alexaSkill: amzn1.ask.skill.a72af757-c4c7-4c25-98f5-8103bd4cb01a
+      - alexaSkill: ${self:custom.alexaSkillIds.${self:provider.stage}}
+    environment:
+      STAGE: ${self:provider.stage}
