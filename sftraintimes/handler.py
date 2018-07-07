@@ -52,23 +52,19 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
 
     if dialog_state == 'COMPLETED':
         line_id = slots['line']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['name']
-
-        # Temporary workaround for line change
-        if line_id == 'J' or line_id == 'K':
-            line_id = 'KJ'
-
+        # Temporary workaround for KJ
+        line_id = 'KJ' if line_id == 'J' or line_id == 'K' else line_id
         direction = Direction.from_string(
             slots['direction']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['name'])
-
         first_street = slots['firstStreet']['value']
         second_street = slots['secondStreet']['value']
         first_st = parse_street(first_street)
         second_st = parse_street(second_street)
-
         stop_name = '{} & {}'.format(first_st, second_st)
         long_stop_name = '{} and {}'.format(first_street, second_street)
 
         home_stop_id = setup_controller.get_stop_id(line_id, stop_name, direction)
+
         user = user_service.get_user(user_id)
         if user is None:
             user = {'id': user_id, 'homeStopId': home_stop_id}
