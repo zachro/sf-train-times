@@ -12,8 +12,8 @@ NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
 NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. After that, there\'s one in {} minutes.'
 HELP_INTENT_MESSAGE = 'I can give you train arrival times for the stop closest to your Echo device. To start, ' \
                       'say, set my home stop. Once your home stop is set, you can find out when the next train ' \
-                      'arrives at your stop by saying, get the next train from s f train times.'
-LAUNCH_INTENT_MESSAGE = 'Welcome to s f train times. '
+                      'arrives at your stop by saying, get the next train from train times.'
+LAUNCH_INTENT_MESSAGE = 'Welcome to train times. '
 
 
 def handle_request(event, context):
