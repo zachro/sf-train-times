@@ -50,7 +50,9 @@ def handle_request(event, context):
             response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
     except Exception as e:
-        LOG.error(e)
+        LOG.error('Error encountered while processing event: {}'.format(event))
+        LOG.error('Error type: {}'.format(type(e)))
+        LOG.error('Error message: {}'.format(e))
         output_speech_text = 'Sorry, something went wrong.'
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
