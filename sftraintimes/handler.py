@@ -13,41 +13,28 @@ NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. Af
 HELP_INTENT_MESSAGE = 'I can give you train arrival times for the stop closest to your Echo device. To start, ' \
                       'say, set my home stop. Once your home stop is set, you can find out when the next train ' \
                       'arrives at your stop by saying, get the next train from train times.'
+FALLBACK_INTENT_MESSAGE = 'Sorry, I don\'t think I can help with that. Some things you can ask me are, get the next ' \
+                          'train, or, set my home stop.'
 LAUNCH_INTENT_MESSAGE = 'Welcome to train times. '
 
 
 def handle_request(event, context):
-    """Handles an incoming request from Alexa."""
-    LOG.debug('Received an event: {}'.format(event))
-
-    user_id = event['session']['user']['userId']
-    dialog_state = event['request'].get('dialogState')
-    request_type = event['request']['type']
-    intent_name = event['request'].get('intent', {}).get('name')
-    slots = event['request'].get('intent', {}).get('slots')
+    """
+    Handles an incoming lambda event.
+    :param event: The lambda event.
+    :param context: The lambda context object.
+    :return: An Alexa response object.
+    """
+    request = event['request']
+    session = event['session']
 
     try:
-        if request_type == 'LaunchRequest':
-            response = handle_launch_request()
-
-        elif intent_name and intent_name == 'SetHomeStopByIdIntent':
-            response = handle_set_home_stop_by_id_intent(user_id, slots, UserService())
-
-        elif intent_name and intent_name == 'SetHomeStopIntent':
-            response = handle_setup_dialog_intent(user_id, slots, dialog_state, UserService(), SetupController())
-
-        elif intent_name and intent_name == 'GetNextTrainIntent':
-            response = handle_get_next_train_intent(user_id, StopService(), UserService())
-
-        elif intent_name and intent_name == 'AMAZON.HelpIntent':
-            response = handle_help_intent()
-
-        elif intent_name and intent_name == 'AMAZON.FallbackIntent':
-            response = handle_fallback_intent()
-
+        if request['type'] == 'LaunchRequest':
+            return on_launch()
+        elif request['type'] == 'IntentRequest':
+            return on_intent(request, session)
         else:
-            output_speech_text = 'Sorry, I don\'t think I can help with that.'
-            response = ResponseBuilder(output_speech_text=output_speech_text).build()
+            raise ValueError('Unrecognized request type: {}'.format(request))
 
     except Exception as e:
         LOG.error('Error encountered while processing event: {}'.format(event))
@@ -55,6 +42,40 @@ def handle_request(event, context):
         LOG.error('Error message: {}'.format(e))
         output_speech_text = 'Sorry, something went wrong.'
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
+
+    return response
+
+
+def on_launch():
+    """Handles a LaunchRequest from Alexa."""
+    return handle_launch_request()
+
+
+def on_intent(request, session):
+    """
+    Handles an IntentRequest from Alexa.
+    :param request: The request object from the lambda event.
+    :param session: The session object from the lambda event.
+    :return: An Alexa response object.
+    """
+    intent_name = request['intent']['name']
+    user_id = session['user']['userId']
+
+    if intent_name == 'SetHomeStopByIdIntent':
+        response = handle_set_home_stop_by_id_intent(user_id, request['intent']['slots'], UserService())
+    elif intent_name == 'SetHomeStopIntent':
+        dialog_state = request['dialogState']
+        response = handle_set_home_stop_intent(user_id, request['intent']['slots'], dialog_state, UserService(),
+                                               SetupController())
+    elif intent_name == 'GetNextTrainIntent':
+        response = handle_get_next_train_intent(user_id, StopService(), UserService())
+    elif intent_name == 'AMAZON.HelpIntent':
+        response = handle_help_intent()
+    elif intent_name == 'AMAZON.FallbackIntent':
+        response = handle_fallback_intent()
+    else:
+        LOG.warning('Unrecognized IntentRequest: {}'.format(request))
+        response = handle_fallback_intent()
 
     return response
 
@@ -68,12 +89,17 @@ def handle_launch_request():
     return ResponseBuilder(output_speech_text=output_speech_text).build()
 
 
-def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup_controller):
-    response = {
-        'version': '1.0',
-        'sessionAttributes': {},
-        'response': {}
-    }
+def handle_set_home_stop_intent(request, session, user_service, setup_controller):
+    """
+    Handles a SetHomeStopIntent request.
+    :param request: The Alexa request object.
+    :param session: The Alexa session object.
+    :param user_service: A UserService instance.
+    :param setup_controller: A SetupController instance.
+    :return: An Alexa response object.
+    """
+    dialog_state = request['dialogState']
+    slots = request['intent']['slots']
 
     if dialog_state == 'COMPLETED':
         line_id = slots['line']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['name']
@@ -90,7 +116,9 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
 
         home_stop_id = setup_controller.get_stop_id(line_id, stop_name, direction)
 
+        user_id = session['user']['userId']
         user = user_service.get_user(user_id)
+
         if user is None:
             user = {'id': user_id, 'homeStopId': home_stop_id}
             user_service.add_user(user)
@@ -102,6 +130,11 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
 
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
     else:
+        response = {
+            'version': '1.0',
+            'sessionAttributes': {},
+            'response': {}
+        }
         response['response']['directives'] = [
             {
                 'type': 'Dialog.Delegate',
@@ -117,15 +150,16 @@ def handle_setup_dialog_intent(user_id, slots, dialog_state, user_service, setup
     return response
 
 
-def handle_set_home_stop_by_id_intent(user_id, slots, user_service):
+def handle_set_home_stop_by_id_intent(request, session, user_service):
     """
     Handles a SetHomeStopIntent request.
-    :param user_id: The ID of the device making the request.
-    :param slots: The slots contained in the IntentRequest.
+    :param request: The Alexa request object.
+    :param session: The Alexa session object.
     :param user_service: A UserService instance.
-    :return: A dict containing the Alexa response.
+    :return: An Alexa response object.
     """
-    home_stop_id = slots['stopId']['value']
+    home_stop_id = request['intent']['slots']['stopId']['value']
+    user_id = session['user']['userId']
     user = user_service.get_user(user_id)
 
     if user is None:
@@ -140,14 +174,15 @@ def handle_set_home_stop_by_id_intent(user_id, slots, user_service):
     return response
 
 
-def handle_get_next_train_intent(user_id, stop_controller, user_service):
+def handle_get_next_train_intent(session, stop_controller, user_service):
     """
     Handles a GetNextTrainIntent request.
-    :param user_id: The ID of the device making the request.
-    :param stop_controller: A controller.StopController instance for getting train information.
+    :param session: The Alexa session object.
+    :param stop_controller: A StopController instance.
     :param user_service: A UserService instance.
-    :return: A dict containing the Alexa response.
+    :return: An Alexa response object.
     """
+    user_id = session['user']['userId']
     user = user_service.get_user(user_id)
     if user is None:
         output_speech_text = 'Sorry, you\'ll need to set your home stop before asking for train times.'
@@ -171,7 +206,7 @@ def handle_get_next_train_intent(user_id, stop_controller, user_service):
 def handle_help_intent():
     """
     Handles the built-in AMAZON.HelpIntent.
-    :return: A dict containing the Alexa response.
+    :return: An Alexa response object.
     """
     return ResponseBuilder(output_speech_text=HELP_INTENT_MESSAGE).build()
 
@@ -179,11 +214,9 @@ def handle_help_intent():
 def handle_fallback_intent():
     """
     Handles the built-in AMAZON.FallbackIntent
-    :return: A dict containing the Alexa response.
+    :return: An Alexa response object.
     """
-    output_speech_text = 'Sorry, I didn\'t understand that. Some things you can ask me are, get the next train, or , ' \
-                         'set my home stop.'
-    return ResponseBuilder(output_speech_text=output_speech_text).build()
+    return ResponseBuilder(output_speech_text=FALLBACK_INTENT_MESSAGE).build()
 
 
 def _get_wait_time(arrival_time):
