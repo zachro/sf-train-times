@@ -37,9 +37,7 @@ def handle_request(event, context):
             raise ValueError('Unrecognized request type: {}'.format(request))
 
     except Exception as e:
-        LOG.error('Error encountered while processing event: {}'.format(event))
-        LOG.error('Error type: {}'.format(type(e)))
-        LOG.error('Error message: {}'.format(e))
+        LOG.exception(e)
         output_speech_text = 'Sorry, something went wrong.'
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
 
@@ -64,11 +62,9 @@ def on_intent(request, session):
     if intent_name == 'SetHomeStopByIdIntent':
         response = handle_set_home_stop_by_id_intent(user_id, request['intent']['slots'], UserService())
     elif intent_name == 'SetHomeStopIntent':
-        dialog_state = request['dialogState']
-        response = handle_set_home_stop_intent(user_id, request['intent']['slots'], dialog_state, UserService(),
-                                               SetupController())
+        response = handle_set_home_stop_intent(request, session, UserService(), SetupController())
     elif intent_name == 'GetNextTrainIntent':
-        response = handle_get_next_train_intent(user_id, StopService(), UserService())
+        response = handle_get_next_train_intent(session, StopService(), UserService())
     elif intent_name == 'AMAZON.HelpIntent':
         response = handle_help_intent()
     elif intent_name == 'AMAZON.FallbackIntent':
