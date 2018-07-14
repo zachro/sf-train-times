@@ -82,8 +82,7 @@ def handle_launch_request():
     return ResponseBuilder(output_speech_text=output_speech_text).build()
 
 
-def handle_set_home_stop_intent(request, session, user_service=get_user_service(),
-                                setup_controller=get_setup_controller()):
+def handle_set_home_stop_intent(request, session, user_service=None, setup_controller=None):
     """
     Handles a SetHomeStopIntent request.
     :param request: The Alexa request object.
@@ -96,6 +95,9 @@ def handle_set_home_stop_intent(request, session, user_service=get_user_service(
     slots = request['intent']['slots']
 
     if dialog_state == 'COMPLETED':
+        user_service = get_user_service() if not user_service else user_service
+        setup_controller = get_setup_controller() if not setup_controller else setup_controller
+
         line_id = slots['line']['resolutions']['resolutionsPerAuthority'][0]['values'][0]['value']['name']
         # Temporary workaround for KJ
         line_id = 'KJ' if line_id == 'J' or line_id == 'K' else line_id
@@ -144,7 +146,7 @@ def handle_set_home_stop_intent(request, session, user_service=get_user_service(
     return response
 
 
-def handle_set_home_stop_by_id_intent(request, session, user_service=get_user_service()):
+def handle_set_home_stop_by_id_intent(request, session, user_service=None):
     """
     Handles a SetHomeStopIntent request.
     :param request: The Alexa request object.
@@ -152,6 +154,8 @@ def handle_set_home_stop_by_id_intent(request, session, user_service=get_user_se
     :param user_service: A UserService instance.
     :return: An Alexa response object.
     """
+    user_service = get_user_service() if not user_service else user_service
+
     home_stop_id = request['intent']['slots']['stopId']['value']
     user_id = session['user']['userId']
     user = user_service.get_user(user_id)
@@ -168,7 +172,7 @@ def handle_set_home_stop_by_id_intent(request, session, user_service=get_user_se
     return response
 
 
-def handle_get_next_train_intent(session, stop_service=get_stop_service(), user_service=get_user_service()):
+def handle_get_next_train_intent(session, stop_service=None, user_service=None):
     """
     Handles a GetNextTrainIntent request.
     :param session: The Alexa session object.
@@ -176,6 +180,9 @@ def handle_get_next_train_intent(session, stop_service=get_stop_service(), user_
     :param user_service: A UserService instance.
     :return: An Alexa response object.
     """
+    stop_service = get_stop_service() if not stop_service else stop_service
+    user_service = get_user_service() if not user_service else user_service
+
     user_id = session['user']['userId']
     user = user_service.get_user(user_id)
     if user is None:

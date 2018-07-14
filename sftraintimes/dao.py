@@ -4,7 +4,7 @@ from os import environ
 
 class UserDAO:
     """Contains methods for getting, adding, and updating users in the database."""
-    USER_TABLE_NAME = 'User-' + environ.get('STAGE')
+    USER_TABLE_NAME = 'User-' + environ.get('STAGE', 'dev')
 
     def __init__(self, table):
         """
@@ -37,7 +37,7 @@ class UserDAO:
         :param kwargs: Key-value pairs for each field to update in the database. If the field does not already exist, it
                        will be added.
         """
-        if kwargs is None:
+        if not kwargs:
             return
 
         update_expression = 'SET '
