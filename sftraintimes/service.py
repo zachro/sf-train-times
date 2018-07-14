@@ -1,13 +1,9 @@
-from sftraintimes.client import FiveElevenClient
-from sftraintimes.dao import UserDAO
-
-
 AGENCY = 'SF'
 
 
 class UserService:
     """Service class for manipulating user data."""
-    def __init__(self, user_dao=UserDAO()):
+    def __init__(self, user_dao):
         """
         Constructs a new UserService instance.
         :param user_dao: A UserDAO instance.
@@ -41,7 +37,7 @@ class UserService:
 
 class StopService:
     """Service class for getting stop information."""
-    def __init__(self, five_eleven_client=FiveElevenClient()):
+    def __init__(self, five_eleven_client):
         """
         Constructs a new StopService instance.
         :param five_eleven_client: A FiveElevenClient instance for making API calls.
@@ -62,7 +58,7 @@ class StopService:
 
 class LineService:
     """Service class for getting line information."""
-    def __init__(self, five_eleven_client=FiveElevenClient()):
+    def __init__(self, five_eleven_client):
         """
         Constructs a new LineService instance.
         :param five_eleven_client: A FiveElevenClient instance for making API calls.

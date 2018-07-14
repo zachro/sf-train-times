@@ -6,7 +6,7 @@ class UserDAO:
     """Contains methods for getting, adding, and updating users in the database."""
     USER_TABLE_NAME = 'User-' + environ.get('STAGE')
 
-    def __init__(self, table=boto3.resource('dynamodb').Table(USER_TABLE_NAME)):
+    def __init__(self, table):
         """
         Constructs a new UserDAO instance.
         :param table: A boto3.resources.factory.dynamodb.Table instance representing the user table.

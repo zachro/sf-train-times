@@ -1,9 +1,6 @@
-from sftraintimes.service import LineService
-
-
 class SetupController:
     """Controller class for setting user's home stop."""
-    def __init__(self, line_service=LineService()):
+    def __init__(self, line_service):
         """
         Constructs a new SetupController instance.
         :param line_service: A controller.LineController instance for getting line patterns.

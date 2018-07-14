@@ -1,12 +1,10 @@
 import datetime
 
-import sftraintimes.config as config
-from sftraintimes.controller import SetupController
+from sftraintimes.config import get_user_service, get_logger, get_setup_controller, get_stop_service
 from sftraintimes.model import Direction
-from sftraintimes.service import UserService, StopService
 from sftraintimes.util import ResponseBuilder, parse_datetime, parse_street
 
-LOG = config.get_logger()
+LOG = get_logger()
 
 NEXT_TRAIN_MESSAGE = 'The next train at your stop arrives in {} minutes.'
 NEXT_TWO_TRAINS_MESSAGE = 'The next train at your stop arrives in {} minutes. After that, there\'s one in {} minutes.'
@@ -57,14 +55,13 @@ def on_intent(request, session):
     :return: An Alexa response object.
     """
     intent_name = request['intent']['name']
-    user_id = session['user']['userId']
 
     if intent_name == 'SetHomeStopByIdIntent':
-        response = handle_set_home_stop_by_id_intent(user_id, request['intent']['slots'], UserService())
+        response = handle_set_home_stop_by_id_intent(request, session)
     elif intent_name == 'SetHomeStopIntent':
-        response = handle_set_home_stop_intent(request, session, UserService(), SetupController())
+        response = handle_set_home_stop_intent(request, session)
     elif intent_name == 'GetNextTrainIntent':
-        response = handle_get_next_train_intent(session, StopService(), UserService())
+        response = handle_get_next_train_intent(session)
     elif intent_name == 'AMAZON.HelpIntent':
         response = handle_help_intent()
     elif intent_name == 'AMAZON.FallbackIntent':
@@ -85,7 +82,8 @@ def handle_launch_request():
     return ResponseBuilder(output_speech_text=output_speech_text).build()
 
 
-def handle_set_home_stop_intent(request, session, user_service, setup_controller):
+def handle_set_home_stop_intent(request, session, user_service=get_user_service(),
+                                setup_controller=get_setup_controller()):
     """
     Handles a SetHomeStopIntent request.
     :param request: The Alexa request object.
@@ -146,7 +144,7 @@ def handle_set_home_stop_intent(request, session, user_service, setup_controller
     return response
 
 
-def handle_set_home_stop_by_id_intent(request, session, user_service):
+def handle_set_home_stop_by_id_intent(request, session, user_service=get_user_service()):
     """
     Handles a SetHomeStopIntent request.
     :param request: The Alexa request object.
@@ -170,11 +168,11 @@ def handle_set_home_stop_by_id_intent(request, session, user_service):
     return response
 
 
-def handle_get_next_train_intent(session, stop_controller, user_service):
+def handle_get_next_train_intent(session, stop_service=get_stop_service(), user_service=get_user_service()):
     """
     Handles a GetNextTrainIntent request.
     :param session: The Alexa session object.
-    :param stop_controller: A StopController instance.
+    :param stop_service: A StopController instance.
     :param user_service: A UserService instance.
     :return: An Alexa response object.
     """
@@ -185,7 +183,7 @@ def handle_get_next_train_intent(session, stop_controller, user_service):
         response = ResponseBuilder(output_speech_text=output_speech_text).build()
         return response
 
-    next_stops = stop_controller.get_upcoming_visits(user['homeStopId'])
+    next_stops = stop_service.get_upcoming_visits(user['homeStopId'])
     diff_min = _get_wait_time(next_stops[0]['MonitoredVehicleJourney']['MonitoredCall']['AimedArrivalTime'])
 
     if diff_min < 5:
